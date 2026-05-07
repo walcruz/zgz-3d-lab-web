@@ -1,0 +1,127 @@
+---
+import BaseHead from '../../../components/BaseHead.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../../../consts';
+import { findCatalogSection, getCatalogGroups } from '../../../lib/catalog';
+
+export function getStaticPaths() {
+	return getCatalogGroups().flatMap((group) =>
+		group.sections.map((section) => ({
+			params: {
+				group: group.folder.toLowerCase(),
+				folder: section.slug,
+			},
+			props: {
+				group,
+				section,
+			},
+		})),
+	);
+}
+
+const resolved =
+	Astro.props.section && Astro.props.group
+		? { group: Astro.props.group, section: Astro.props.section }
+		: findCatalogSection(Astro.params.group ?? '', Astro.params.folder ?? '');
+
+if (!resolved) {
+	return Astro.redirect('/');
+}
+
+const { group, section } = resolved;
+const pageTitle = `${section.label} | ${SITE_TITLE}`;
+const pageDescription = `Galeria de ${section.label.toLowerCase()} en ${SITE_TITLE}. ${SITE_DESCRIPTION}`;
+---
+
+<!doctype html>
+<html lang="es">
+	<head>
+		<BaseHead title={pageTitle} description={pageDescription} image={section.coverImage.src} />
+	</head>
+	<body>
+		<Header />
+		<main class="page gallery-page">
+			<section class="gallery-hero">
+				<p class="eyebrow">{group.eyebrow}</p>
+				<h1>{section.label}</h1>
+				<div class="hero-actions">
+					<a class="btn btn-secondary" href="/">Volver</a>
+					<a
+						class="btn btn-instagram"
+						href="https://www.instagram.com/zgz3dlab/"
+						target="_blank"
+						rel="noreferrer"
+					>
+						Pedir por Instagram
+					</a>
+				</div>
+			</section>
+
+			<section class="section">
+				<div class="gallery-grid-full">
+					{section.images.map((image) => (
+						<button
+							type="button"
+							class="gallery-thumb"
+							data-lightbox-src={image.src}
+							data-lightbox-alt={image.alt}
+						>
+							<img
+								loading="lazy"
+								src={image.src}
+								alt={image.alt}
+								width={image.width}
+								height={image.height}
+								class:list={{ 'brand-tile': section.folder === 'Marca propia' }}
+							/>
+						</button>
+					))}
+				</div>
+			</section>
+		</main>
+
+		<dialog id="lightbox" class="lightbox" aria-label="Visor de imagen ampliada">
+			<button type="button" class="lightbox-close" data-lightbox-close aria-label="Cerrar imagen">
+				×
+			</button>
+			<img id="lightbox-image" class="lightbox-image" src="" alt="" />
+		</dialog>
+
+		<script is:inline>
+			const dialog = document.getElementById('lightbox');
+			const dialogImage = document.getElementById('lightbox-image');
+			const closeButton = document.querySelector('[data-lightbox-close]');
+
+			if (dialog instanceof HTMLDialogElement && dialogImage instanceof HTMLImageElement) {
+				document.querySelectorAll('.gallery-thumb').forEach((element) => {
+					element.addEventListener('click', () => {
+						const source = element.getAttribute('data-lightbox-src') || '';
+						const alt = element.getAttribute('data-lightbox-alt') || '';
+						dialogImage.src = source;
+						dialogImage.alt = alt;
+						dialog.showModal();
+					});
+				});
+
+				if (closeButton) {
+					closeButton.addEventListener('click', () => dialog.close());
+				}
+
+				dialog.addEventListener('click', (event) => {
+					const bounds = dialog.getBoundingClientRect();
+					const clickedOutside =
+						event.clientX < bounds.left ||
+						event.clientX > bounds.right ||
+						event.clientY < bounds.top ||
+						event.clientY > bounds.bottom;
+
+					if (clickedOutside) {
+						dialog.close();
+					}
+				});
+			}
+		</script>
+		<Footer />
+	</body>
+</html>

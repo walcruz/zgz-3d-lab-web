@@ -3,47 +3,118 @@ import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { getCatalogGroups } from '../lib/catalog';
+
+const catalogGroups = getCatalogGroups();
+
+const featuredGroup = catalogGroups.find((group) => group.folder === 'lqsale');
+const galleryGroup = catalogGroups.find((group) => group.folder === 'Galeria');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
 		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This
-				template serves as a lightweight, minimally-styled starting point for anyone looking to build
-				a personal website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
-					>read the docs
-				</a> or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out <a
-					href="https://github.com/Charca/astro-blog-template"
-					>astro-blog-template
-				</a> by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+		<main class="page">
+			<section class="hero">
+				<div class="hero-grid">
+					<div>
+						<p class="eyebrow">IMPRESION 3D PERSONALIZADA EN ZARAGOZA</p>
+						<h1>Piezas visuales. Piezas utiles. Piezas tuyas.</h1>
+						<p class="lead">DM por Instagram. Presupuesto rapido. Produccion local.</p>
+					</div>
+					<img class="hero-logo" src="/gpt-logo2.png" alt="Logo de ZGZ 3D Lab" width="310" height="310" />
+				</div>
+				<div class="hero-actions">
+					<a
+						class="btn btn-instagram"
+						href="https://www.instagram.com/zgz3dlab/"
+						target="_blank"
+						rel="noreferrer"
+					>
+						Ver Instagram @zgz3dlab
+					</a>
+					<a class="btn btn-secondary" href="#trabajos">Ver productos</a>
+				</div>
+				<div class="metrics" aria-label="Metricas de servicio">
+					<article>
+						<p class="metric-value">24h</p>
+						<p>Respuesta habitual</p>
+					</article>
+					<article>
+						<p class="metric-value">FDM + Resina</p>
+						<p>Segun el tipo de pieza</p>
+					</article>
+					<article>
+						<p class="metric-value">ZGZ</p>
+						<p>Produccion local</p>
+					</article>
+				</div>
+			</section>
+
+			<section id={featuredGroup?.sectionId ?? 'productos'} class="section product-strip">
+				<div class="mini-intro">
+					<p class="eyebrow">{featuredGroup?.eyebrow ?? 'LO QUE MAS SALE'}</p>
+					<h2>{featuredGroup?.title ?? 'Visual y directo.'}</h2>
+				</div>
+				<div class="catalog-stack" aria-label="Categorias de productos">
+					{
+						(featuredGroup?.sections ?? []).map((section) => (
+							<a class="folder-card" href={`/galeria/${section.groupFolder.toLowerCase()}/${section.slug}/`}>
+								<img
+									loading="lazy"
+									src={section.coverImage.src}
+									alt={section.coverImage.alt}
+									width={section.coverImage.width}
+									height={section.coverImage.height}
+								/>
+								<span>{section.label}</span>
+							</a>
+						))
+					}
+				</div>
+			</section>
+
+			<section id={galleryGroup?.sectionId ?? 'trabajos'} class="section">
+				<div class="mini-intro compact">
+					<p class="eyebrow">{galleryGroup?.eyebrow ?? 'GALERIA'}</p>
+					<h2>{galleryGroup?.title ?? 'Productos.'}</h2>
+				</div>
+				<div class="catalog-stack" aria-label="Ejemplos de trabajos de impresion 3D">
+					{
+						(galleryGroup?.sections ?? []).map((section) => (
+							<a class="folder-card" href={`/galeria/${section.groupFolder.toLowerCase()}/${section.slug}/`}>
+								<img
+									loading="lazy"
+									src={section.coverImage.src}
+									alt={section.coverImage.alt}
+									width={section.coverImage.width}
+									height={section.coverImage.height}
+									class:list={{ 'brand-tile': section.folder === 'Marca propia' }}
+								/>
+								<span>{section.label}</span>
+							</a>
+						))
+					}
+				</div>
+			</section>
+
+			<section id="contacto" class="section cta">
+				<h2>Instagram primero.</h2>
+				<div class="hero-actions center">
+					<a
+						class="btn btn-instagram"
+						href="https://www.instagram.com/zgz3dlab/"
+						target="_blank"
+						rel="noreferrer"
+					>
+						Abrir Instagram
+					</a>
+				</div>
+			</section>
 		</main>
 		<Footer />
 	</body>
