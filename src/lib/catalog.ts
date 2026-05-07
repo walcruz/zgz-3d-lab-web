@@ -1,7 +1,4 @@
-import type { ImageMetadata } from 'astro';
-import { readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import catalogManifest from './catalog-manifest.json';
 
 export type CatalogGroupDefinition = {
 	folder: string;
@@ -30,15 +27,8 @@ export type CatalogGroup = CatalogGroupDefinition & {
 	sections: FolderSection[];
 };
 
-const catalogFiles = import.meta.glob<{ default: ImageMetadata }>(
-	'../assets/catalog/**/*.{png,jpg,jpeg,webp,avif,gif}',
-	{ eager: true },
-);
-
-const catalogRoot = fileURLToPath(new URL('../assets/catalog', import.meta.url));
-
 export const groupDefinitions: CatalogGroupDefinition[] = [
-	{ folder: 'lqsale', eyebrow: 'LO QUE MAS SALE', title: 'Visual y directo.', sectionId: 'productos' },
+	{ folder: 'lqsale', eyebrow: 'LO MÁS POPULAR', title: 'Visual y directo.', sectionId: 'productos' },
 	{ folder: 'Galeria', eyebrow: 'GALERIA', title: 'Productos.', sectionId: 'trabajos' },
 ];
 
@@ -103,14 +93,11 @@ export const formatLabel = (folder: string) => {
 };
 
 const getSubfolders = (groupFolder: string) => {
-	try {
-		return readdirSync(join(catalogRoot, groupFolder), { withFileTypes: true })
-			.filter((entry) => entry.isDirectory())
-			.map((entry) => entry.name)
-			.sort((left, right) => left.localeCompare(right));
-	} catch {
+	const groupData = (catalogManifest as Record<string, Record<string, string[]>>)[groupFolder];
+	if (!groupData) {
 		return [];
 	}
+	return Object.keys(groupData).sort((left, right) => left.localeCompare(right));
 };
 
 const toRenderImages = (groupFolder: string, folder: string): RenderImage[] => {
@@ -119,18 +106,16 @@ const toRenderImages = (groupFolder: string, folder: string): RenderImage[] => {
 		alt: `${formatLabel(folder)} impreso en 3D`,
 	};
 
-	const matches = Object.entries(catalogFiles)
-		.filter(([path]) => path.includes(`/catalog/${groupFolder}/${folder}/`))
-		.sort(([left], [right]) => left.localeCompare(right))
-		.map(([, asset]) => ({
-			src: asset.default.src,
-			width: asset.default.width,
-			height: asset.default.height,
+	const groupData = (catalogManifest as Record<string, Record<string, string[]>>)[groupFolder];
+	const files = groupData?.[folder] ?? [];
+
+	if (files.length > 0) {
+		return files.map((file) => ({
+			src: `/catalog/${groupFolder}/${folder}/${file}`,
+			width: 720,
+			height: 480,
 			alt: presentation.alt,
 		}));
-
-	if (matches.length > 0) {
-		return matches;
 	}
 
 	return [{ src: presentation.fallback, width: 720, height: 480, alt: presentation.alt }];

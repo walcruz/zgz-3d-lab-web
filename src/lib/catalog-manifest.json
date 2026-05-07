@@ -1,0 +1,14 @@
+{
+  "lqsale": {
+    "Figuras": ["dino3d.png"],
+    "Accessorios": ["vino1.png"],
+    "Recambios": []
+  },
+  "Galeria": {
+    "Marca propia": ["gpt-logo2.png"],
+    "miniaturas": ["dragon1.jpg", "dragon2.jpg"],
+    "Producto": [],
+    "setup": [],
+    "taller": []
+  }
+}
