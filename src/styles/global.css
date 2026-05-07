@@ -60,6 +60,7 @@ body {
 	background: transparent;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
+	overflow-x: hidden;
 	color: #edf2ef;
 	font-size: 19px;
 	line-height: 1.6;
@@ -436,6 +437,15 @@ hr {
 	}
 	main {
 		padding: 1rem 0;
+	}
+	h1 .no-break {
+		white-space: normal;
+	}
+	.hero {
+		text-align: center;
+	}
+	.lead {
+		margin-inline: auto;
 	}
 	.metrics,
 	.catalog-stack,
